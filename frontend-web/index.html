@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>智能面试系统</title>
+  <style>
+
+    :root {
+      --ink:          #16232E;
+      --ink-2:        #4A5B69;
+      --ink-3:        #8798A5;
+      --ink-ph:       #7C8D9A;
+      --line:         #E2E7EC;
+      --line-strong:  #C3CDD6;
+      --paper:        #FFFFFF;
+      --desk:         #F3F5F7;
+      --indigo:       #2B4B7E;
+      --indigo-dark:  #1E3A66;
+      --indigo-wash:  #EDF2F9;
+      --ok:           #2E7D5B;
+      --warn:         #B5442F;
+      --gold:         #9A6B12;
+
+      --r-sm:  8px;
+      --r-md:  12px;
+      --shadow: 0 1px 2px rgba(22, 35, 46, .06),
+                0 6px 20px rgba(22, 35, 46, .05);
+
+      --serif: "Source Han Serif SC", "Songti SC", "SimSun", serif;
+      --sans:  "PingFang SC", "Microsoft YaHei", "Noto Sans SC",
+               "Segoe UI", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { height: 100%; }
+
+    body {
+      margin: 0;
+      font-family: var(--sans);
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--ink);
+      background: var(--desk);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    [v-cloak] { display: none; }
+
+    h1, h2, h3, p { margin: 0; }
+
+    button, input, textarea { font: inherit; color: inherit; }
+
+    :focus-visible {
+      outline: 2px solid var(--indigo);
+      outline-offset: 2px;
+    }
+
+    #app {
+      display: grid;
+      grid-template-columns: 312px 1fr;
+      height: 100vh;
+    }
+
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      padding: 24px 20px;
+      overflow-y: auto;
+      background: var(--paper);
+      border-right: 1px solid var(--line);
+    }
+
+    .brand h1 {
+      font-family: var(--serif);
+      font-size: 21px;
+      font-weight: 600;
+      letter-spacing: .01em;
+      line-height: 1.4;
+    }
+
+    .brand p {
+      margin-top: 4px;
+      font-size: 12.5px;
+      color: var(--ink-3);
+    }
+
+    .side-sec {
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+    }
+
+    .side-sec > h2 {
+      margin-bottom: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink-2);
+    }
+
+    .main {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .main-head {
+      padding: 20px 32px;
+      background: var(--paper);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .main-head h1 {
+      font-family: var(--serif);
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .main-head p {
+      margin-top: 2px;
+      font-size: 12.5px;
+      color: var(--ink-3);
+    }
+
+    .thread {
+      flex: 1;
+      overflow-y: auto;
+      padding: 28px 32px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 9px 16px;
+      font-size: 13.5px;
+      font-weight: 500;
+      border: 1px solid transparent;
+      border-radius: var(--r-sm);
+      cursor: pointer;
+      transition: background .15s, border-color .15s, color .15s;
+    }
+
+    .btn-block { width: 100%; }
+
+    .btn-primary {
+      color: #fff;
+      background: var(--indigo);
+    }
+    .btn-primary:hover:not(:disabled) { background: var(--indigo-dark); }
+
+    .btn-ghost {
+      color: var(--ink);
+      background: var(--paper);
+      border-color: var(--line-strong);
+    }
+    .btn-ghost:hover:not(:disabled) {
+      color: var(--indigo);
+      background: var(--indigo-wash);
+      border-color: var(--indigo);
+    }
+
+    .btn:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    .picker { display: block; }
+
+    .picker input { display: none; }
+
+    .picker-box {
+      display: block;
+      padding: 18px 14px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--ink-2);
+      background: var(--desk);
+      border: 1px dashed #C6D0D9;
+      border-radius: var(--r-md);
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+    }
+
+    .picker-box:hover {
+      color: var(--indigo);
+      background: var(--indigo-wash);
+      border-color: var(--indigo);
+    }
+
+    .picker-name {
+      display: block;
+      margin-top: 6px;
+      font-size: 12.5px;
+      color: var(--indigo);
+      word-break: break-all;
+    }
+
+    .field-label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 12.5px;
+      color: var(--ink-2);
+    }
+
+    .field-area {
+      display: block;
+      width: 100%;
+      height: 118px;
+      padding: 10px 12px;
+      font-size: 13px;
+      line-height: 1.65;
+      resize: vertical;
+      background: var(--desk);
+      border: 1.5px solid var(--line-strong);
+      border-radius: var(--r-sm);
+      transition: border-color .15s, background .15s, box-shadow .15s;
+    }
+
+    .field-area::placeholder { color: var(--ink-ph); }
+
+    .field-area:focus {
+      background: var(--paper);
+      border-color: var(--indigo);
+      box-shadow: 0 0 0 3px rgba(43, 75, 126, .12);
+      outline: none;
+    }
+
+    .field-area:disabled { opacity: .6; }
+
+    .stack { display: flex; flex-direction: column; gap: 10px; }
+
+    .notice {
+      padding: 10px 13px;
+      font-size: 12.5px;
+      line-height: 1.6;
+      border-radius: var(--r-sm);
+      border-left: 3px solid transparent;
+      word-break: break-word;
+    }
+
+    .notice-ok {
+      color: var(--ok);
+      background: #EDF6F1;
+      border-left-color: var(--ok);
+    }
+
+    .notice-err {
+      color: var(--warn);
+      background: #FBEFEC;
+      border-left-color: var(--warn);
+    }
+
+    .notice-info {
+      color: var(--ink-2);
+      background: var(--indigo-wash);
+      border-left-color: var(--indigo);
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12.5px;
+      color: var(--ink-2);
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--ink-3);
+      flex: none;
+    }
+
+    .dot-ok       { background: var(--ok); }
+    .dot-wrong    { background: #C8871B; }
+    .dot-down     { background: var(--warn); }
+
+    .dot-checking { background: var(--ink-3); animation: pulse 1.4s ease-in-out infinite; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%      { opacity: .25; }
+    }
+
+    .msg {
+      width: fit-content;
+      max-width: min(760px, 90%);
+      margin-bottom: 20px;
+    }
+
+    .bubble {
+      padding: 11px 16px;
+      border-radius: var(--r-md);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .msg-user { margin-left: auto; }
+    .msg-user .bubble {
+      color: #fff;
+      background: var(--indigo);
+      border-bottom-right-radius: 4px;
+    }
+
+    .msg-bot .bubble {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-bottom-left-radius: 4px;
+    }
+
+    .msg-err .bubble {
+      color: var(--warn);
+      background: #FBEFEC;
+      border-color: #F0D6D0;
+    }
+
+    .msg-eval .bubble {
+      background: var(--indigo-wash);
+      border: 1px solid #D5E0EF;
+      border-bottom-left-radius: 4px;
+    }
+
+    .score-row {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #D5E0EF;
+    }
+
+    .score-num {
+      font-family: var(--serif);
+      font-size: 24px;
+      font-weight: 600;
+      line-height: 1;
+      color: var(--indigo);
+    }
+
+    .score-unit { font-size: 12.5px; color: var(--ink-3); }
+
+    .score-label { margin-left: auto; font-size: 12.5px; color: var(--ink-3); }
+
+    .score-line { font-size: 13px; }
+
+    .score-line + .score-line { margin-top: 3px; }
+
+    .score-line b { font-weight: 600; color: var(--ink-2); }
+
+    .report {
+      max-width: min(760px, 100%);
+      margin: 8px 0 20px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--r-md);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .report-head {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 18px 22px;
+      background: var(--indigo-wash);
+      border-bottom: 1px solid #D5E0EF;
+    }
+
+    .report-head h2 {
+      font-family: var(--serif);
+      font-size: 17px;
+      font-weight: 600;
+    }
+
+    .report-head p {
+      margin-top: 2px;
+      font-size: 12.5px;
+      color: var(--ink-3);
+    }
+
+    .report-total {
+      margin-left: auto;
+      text-align: right;
+      line-height: 1.2;
+    }
+
+    .report-total strong {
+      font-family: var(--serif);
+      font-size: 34px;
+      font-weight: 600;
+      color: var(--indigo);
+    }
+
+    .report-total span { font-size: 12.5px; color: var(--ink-3); }
+
+    .report-body { padding: 20px 22px 22px; }
+
+    .report-sec + .report-sec { margin-top: 20px; }
+
+    .report-sec h3 {
+      margin-bottom: 7px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--indigo);
+    }
+
+    .report-sec p { color: var(--ink-2); }
+
+    .report-sec ul, .report-sec ol {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--ink-2);
+    }
+
+    .report-sec li + li { margin-top: 4px; }
+
+    .empty {
+      max-width: 440px;
+      margin: 12vh auto 0;
+      text-align: center;
+    }
+
+    .empty h2 {
+      font-family: var(--serif);
+      font-size: 19px;
+      font-weight: 600;
+    }
+
+    .empty p {
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--ink-3);
+      line-height: 1.8;
+    }
+
+    .composer {
+      display: flex;
+      gap: 10px;
+      padding: 16px 32px 22px;
+      background: var(--paper);
+      border-top: 1px solid var(--line);
+    }
+
+    .composer input {
+      flex: 1;
+      min-width: 0;
+      padding: 12px 16px;
+      background: var(--desk);
+      border: 1.5px solid var(--line-strong);
+      border-radius: var(--r-sm);
+      transition: border-color .15s, background .15s, box-shadow .15s;
+    }
+
+    .composer input::placeholder { color: var(--ink-ph); }
+
+    .composer input:focus {
+      background: var(--paper);
+      border-color: var(--indigo);
+      box-shadow: 0 0 0 3px rgba(43, 75, 126, .12);
+      outline: none;
+    }
+
+    .composer input:disabled { opacity: .6; }
+
+    .spin {
+      width: 12px;
+      height: 12px;
+      border: 2px solid currentColor;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      flex: none;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; transition: none !important; }
+    }
+
+    @media (max-width: 860px) {
+      #app {
+        grid-template-columns: 1fr;
+        height: auto;
+        min-height: 100vh;
+      }
+
+      .sidebar {
+        border-right: none;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .thread   { padding: 20px; }
+      .main-head { padding: 16px 20px; }
+      .composer { padding: 14px 20px 18px; }
+      .msg      { max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+<div id="app" v-cloak>
+
+  <aside class="sidebar">
+
+    <div class="brand">
+      <h1>智能面试系统</h1>
+      <p>上传简历和目标岗位,进行多轮技术面试</p>
+    </div>
+
+    <section class="side-sec">
+      <h2>面试准备</h2>
+      <div class="stack">
+
+        <label class="picker">
+          <input type="file" accept=".pdf,application/pdf" :disabled="busy" @change="onPickFile">
+          <span class="picker-box">
+            点击选择简历 PDF
+            <span class="picker-name" v-if="file">{{ file.name }}</span>
+          </span>
+        </label>
+
+        <div>
+          <label class="field-label" for="jd">岗位信息</label>
+          <textarea id="jd"
+                    class="field-area"
+                    v-model="jobDescription"
+                    :disabled="busy"
+                    placeholder="请输入目标岗位的具体描述"></textarea>
+        </div>
+
+        <button class="btn btn-primary btn-block"
+                :disabled="!canStart"
+                @click="start">
+          <span class="spin" v-if="starting"></span>
+          {{ starting ? '正在分析' : '开始面试' }}
+        </button>
+
+        <div class="notice"
+             :class="'notice-' + setupNotice.kind"
+             v-if="setupNotice.text">
+          {{ setupNotice.text }}
+        </div>
+
+      </div>
+    </section>
+
+    <section class="side-sec">
+      <h2>面试状态</h2>
+      <div class="stack">
+        <div class="notice" :class="'notice-' + phase.kind">{{ phase.text }}</div>
+        <button class="btn btn-ghost btn-block"
+                :disabled="busy"
+                @click="reset">
+          重新开始
+        </button>
+      </div>
+    </section>
+
+    <section class="side-sec">
+      <h2>系统状态</h2>
+      <div class="status">
+        <span class="dot" :class="'dot-' + health"></span>
+        <span>{{ healthText }}</span>
+      </div>
+    </section>
+
+  </aside>
+
+  <main class="main">
+
+    <header class="main-head">
+      <h1>模拟面试</h1>
+      <p>每题答完会给出评分与薄弱点,共 5 轮后生成评估报告</p>
+    </header>
+
+    <div class="thread" ref="thread">
+
+      <div class="empty" v-if="messages.length === 0 && !finalReport">
+        <h2>还没有开始面试</h2>
+        <p>
+          在左侧上传简历 PDF、填写目标岗位描述,然后点击「开始面试」。<br>
+          面试官会根据你的简历和岗位要求出题,并针对回答的薄弱点继续追问。
+        </p>
+      </div>
+
+      <template v-for="(m, i) in messages" :key="i">
+
+        <div class="msg" :class="'msg-' + m.role" v-if="m.role === 'eval'">
+          <div class="bubble">
+            <div class="score-row">
+              <span class="score-num">{{ m.score }}</span>
+              <span class="score-unit">分</span>
+              <span class="score-label">本题评分</span>
+            </div>
+            <div class="score-line"><b>评价：</b>{{ m.reason }}</div>
+            <div class="score-line"><b>薄弱点：</b>{{ m.weakness }}</div>
+          </div>
+        </div>
+
+        <div class="msg" :class="'msg-' + m.role" v-else>
+          <div class="bubble">{{ m.text }}</div>
+        </div>
+
+      </template>
+
+      <div class="report" v-if="finalReport">
+        <div class="report-head">
+          <div>
+            <h2>个人面试报告</h2>
+            <p>基于本次 5 轮问答生成</p>
+          </div>
+          <div class="report-total">
+            <strong>{{ finalReport['综合评分'] }}</strong><span> 分</span>
+            <p>综合评分</p>
+          </div>
+        </div>
+
+        <div class="report-body">
+
+          <section class="report-sec">
+            <h3>总体评价</h3>
+            <p>{{ finalReport['总体评价'] }}</p>
+          </section>
+
+          <section class="report-sec">
+            <h3>优点</h3>
+            <ul>
+              <li v-for="(item, i) in finalReport['优点'] || []" :key="i">{{ item }}</li>
+            </ul>
+          </section>
+
+          <section class="report-sec">
+            <h3>薄弱点</h3>
+            <ul>
+              <li v-for="(item, i) in finalReport['薄弱点'] || []" :key="i">{{ item }}</li>
+            </ul>
+          </section>
+
+          <section class="report-sec">
+            <h3>改进建议</h3>
+            <ol>
+              <li v-for="(item, i) in finalReport['改进建议'] || []" :key="i">{{ item }}</li>
+            </ol>
+          </section>
+
+        </div>
+      </div>
+
+    </div>
+
+    <form class="composer" @submit.prevent="submitAnswer">
+      <input v-model="answer"
+             :placeholder="composerPlaceholder"
+             :disabled="composerDisabled">
+      <button class="btn btn-primary" type="submit" :disabled="!canAnswer">
+        <span class="spin" v-if="answering"></span>
+        {{ answering ? '分析中' : '发送' }}
+      </button>
+    </form>
+
+  </main>
+
+</div>
+
+<script src="./vue.global.prod.js"
+        onerror="var a=document.getElementById('app');a.removeAttribute('v-cloak');a.innerHTML='<p style=&quot;padding:40px&quot;>找不到 vue.global.prod.js,确认它和 index.html 在同一个文件夹里。</p>'"></script>
+
+<script>
+
+  const API_BASE = 'http://127.0.0.1:8000';
+  const REQUEST_TIMEOUT = 120000;
+
+  // 后端 500/504 会带 detail 字段,优先用它做提示
+  async function readDetail(res, fallback) {
+    const data = await res.json().catch(() => null);
+    if (data && typeof data.detail === 'string' && data.detail.trim()) {
+      return data.detail;
+    }
+    return fallback + '(状态码 ' + res.status + ')';
+  }
+
+  function requestErrorText(err, action) {
+    if (err && err.name === 'TimeoutError') {
+      return action + '请求超时,请稍后重试';
+    }
+    return '连不上后端,请确认 FastAPI 已启动。';
+  }
+
+  const { createApp } = Vue;
+
+  createApp({
+
+    data() {
+      return {
+        file: null,
+        jobDescription: '',
+        starting: false,
+        setupNotice: { kind: 'info', text: '' },
+
+        sessionId: '',
+        started: false,
+        finished: false,
+        messages: [],
+        answer: '',
+        answering: false,
+        finalReport: null,
+
+        health: 'checking',
+      };
+    },
+
+    computed: {
+
+      busy() {
+        return this.starting || this.answering;
+      },
+
+      canStart() {
+        return this.file !== null
+          && this.jobDescription.trim() !== ''
+          && !this.busy;
+      },
+
+      canAnswer() {
+        return this.answer.trim() !== '' && !this.composerDisabled;
+      },
+
+      composerDisabled() {
+        return !this.started || this.finished || this.answering;
+      },
+
+      composerPlaceholder() {
+        if (!this.started) return '请先在左侧上传简历并填写岗位信息,然后开始面试';
+        if (this.finished) return '本次面试已结束,请查看下方评估报告';
+        return '请输入你的回答…';
+      },
+
+      phase() {
+        if (this.finished) return { kind: 'ok', text: '本次面试已结束,请查看评估报告' };
+        if (this.started) return { kind: 'ok', text: '正在面试当中' };
+        return { kind: 'info', text: '请上传简历并填写岗位信息' };
+      },
+
+      healthText() {
+        return {
+          checking: '正在检测后端…',
+          ok:       '后端已连接',
+          wrong:    '端口上不是面试服务',
+          down:     '后端未启动',
+        }[this.health];
+      },
+
+    },
+
+    methods: {
+
+      onPickFile(event) {
+        if (this.busy) return;
+
+        const picked = event.target.files[0] || null;
+
+        if (picked && (!/\.pdf$/i.test(picked.name) || picked.size === 0)) {
+          this.file = null;
+          this.setupNotice = { kind: 'err', text: '请选择非空的 PDF 简历文件' };
+          event.target.value = '';
+          return;
+        }
+
+        this.file = picked;
+        this.setupNotice = { kind: 'info', text: '' };
+        event.target.value = '';
+      },
+
+      async start() {
+        if (!this.canStart) return;
+
+        this.starting = true;
+        this.setupNotice = { kind: 'info', text: '正在分析简历与岗位信息…' };
+
+        try {
+          const form = new FormData();
+          form.append('file', this.file);
+          form.append('job_description', this.jobDescription.trim());
+
+          const res = await fetch(API_BASE + '/interview/start', {
+            method: 'POST',
+            body: form,
+            signal: AbortSignal.timeout(REQUEST_TIMEOUT),
+          });
+
+          if (res.ok) {
+            const data = await res.json().catch(() => ({}));
+
+            if (!data.session_id
+                || typeof data.curr_question !== 'string'
+                || data.curr_question === '') {
+              this.setupNotice = { kind: 'err', text: '后端返回的数据格式不正确,请检查服务' };
+              return;
+            }
+
+            this.messages = [{ role: 'bot', text: data.curr_question }];
+            this.sessionId = data.session_id;
+            this.started = true;
+            this.finished = false;
+            this.finalReport = null;
+            this.answer = '';
+            this.setupNotice = { kind: 'ok', text: '面试已开始,请在右侧作答' };
+          } else {
+            this.setupNotice = {
+              kind: 'err',
+              text: await readDetail(res, '开始面试失败,请稍后重试'),
+            };
+          }
+        } catch (err) {
+          this.setupNotice = { kind: 'err', text: requestErrorText(err, '开始面试') };
+        } finally {
+          this.starting = false;
+          this.scrollToBottom();
+        }
+      },
+
+      async submitAnswer() {
+        if (!this.canAnswer) return;
+
+        const text = this.answer.trim();
+        this.answer = '';
+        this.messages.push({ role: 'user', text: text });
+        this.answering = true;
+        this.scrollToBottom();
+
+        try {
+          const res = await fetch(API_BASE + '/interview/answer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ session_id: this.sessionId, curr_answer: text }),
+            signal: AbortSignal.timeout(REQUEST_TIMEOUT),
+          });
+
+          if (res.ok) {
+            const data = await res.json().catch(() => ({}));
+
+            if (typeof data.final_report === 'string' && data.final_report !== '') {
+              this.finished = true;
+              try {
+                this.finalReport = JSON.parse(data.final_report);
+              } catch (err) {
+                this.finalReport = null;
+                this.messages.push({ role: 'err', text: '评估报告解析失败,请稍后重试' });
+              }
+            } else if (data.curr_evaluation && typeof data.curr_question === 'string') {
+              const evaluation = data.curr_evaluation;
+              this.messages.push({
+                role: 'eval',
+                score: evaluation.score,
+                reason: evaluation.reason,
+                weakness: evaluation.weakness,
+              });
+              this.messages.push({ role: 'bot', text: data.curr_question });
+            } else {
+              this.messages.push({
+                role: 'err',
+                text: '后端返回的数据格式不正确,请检查服务',
+              });
+            }
+          } else if (res.status === 404) {
+            const detail = await readDetail(res, '面试会话不存在');
+            this.sessionId = '';
+            this.started = false;
+            this.finished = false;
+            this.setupNotice = { kind: 'err', text: '会话不存在,请重新开始面试：' + detail };
+          } else {
+            this.messages.push({
+              role: 'err',
+              text: await readDetail(res, '提交回答失败,请稍后重试'),
+            });
+          }
+        } catch (err) {
+          this.messages.push({ role: 'err', text: requestErrorText(err, '提交回答') });
+        } finally {
+          this.answering = false;
+          this.scrollToBottom();
+        }
+      },
+
+      reset() {
+        if (this.busy) return;
+        this.sessionId = '';
+        this.started = false;
+        this.finished = false;
+        this.messages = [];
+        this.answer = '';
+        this.finalReport = null;
+        this.setupNotice = { kind: 'info', text: '' };
+      },
+
+      async checkHealth() {
+        try {
+          const res = await fetch(API_BASE + '/', {
+            signal: AbortSignal.timeout(3000),
+          });
+          const data = await res.json();
+          this.health = data.message === '智能面试系统启动成功' ? 'ok' : 'wrong';
+        } catch (err) {
+          this.health = 'down';
+        }
+      },
+
+      scrollToBottom() {
+        this.$nextTick(() => {
+          const box = this.$refs.thread;
+          if (box) box.scrollTop = box.scrollHeight;
+        });
+      },
+
+    },
+
+    mounted() {
+      this.checkHealth();
+    },
+
+  }).mount('#app');
+</script>
+</body>
+</html>

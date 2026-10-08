@@ -2,8 +2,6 @@ fastapi==0.141.1
 uvicorn==0.52.4
 python-multipart==0.0.32
 pydantic==2.13.5
-streamlit==1.63.0
-requests==2.34.2
 openai==3.6.0
 python-dotenv==1.2.3
 pypdf==6.18.1

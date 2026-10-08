@@ -1,5 +1,6 @@
 
 from fastapi import FastAPI,UploadFile,File,Form,HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 import os
 import logging
 import uuid
@@ -8,10 +9,26 @@ from app.main import interview_graph
 from pydantic import BaseModel
 logger = logging.getLogger(__name__)
 
-app = FastAPI()
+app = FastAPI(
+    title="AI Interview Agent API",
+    description="智能面试系统接口",
+    version="1.0.0"
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:4000",
+        "http://127.0.0.1:4000",
+    ],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 class AnswerRequest(BaseModel):
     session_id: str
     curr_answer:str
+@app.get("/")
+def home():
+    return {"message": "智能面试系统启动成功"}
 @app.post("/interview/start")
 async def upload_file(file: UploadFile = File(...),job_description:str=Form(...)):
     try:
@@ -25,6 +42,7 @@ async def upload_file(file: UploadFile = File(...),job_description:str=Form(...)
                          "job_description": job_description,
                          "curr_question": "",
                          "curr_answer": "",
+                         "curr_rubric": {},
                          "interview_round": 1,
                          "prev_data": [],
                          "curr_evaluation": {},
